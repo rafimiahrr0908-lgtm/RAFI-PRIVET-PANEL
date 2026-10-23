@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>RAFI PRIVATE PANEL - BOLD MATRIX CORE</title>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@700&display=swap" rel="stylesheet">
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 700; /* Text Mota kora holo */
+  }
+  body {
+    background-color: #000;
+    color: #00ff00;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 15px;
+    overflow-x: hidden;
+  }
+  
+  .matrix-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(0, 0, 0, 0.93), rgba(0, 0, 0, 0.97)), 
+                url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1000') no-repeat center center/cover;
+    opacity: 0.15;
+    z-index: -1;
+  }
+
+  .wrap {
+    width: 100%;
+    max-width: 480px;
+    display: none;
+  }
+
+  /* AUTH SCREEN */
+  #authOverlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: #000;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .auth-box {
+    background: rgba(5, 18, 5, 0.95);
+    border: 3px solid #00ff00; /* Mota Border */
+    box-shadow: 0 0 30px rgba(0, 255, 0, 0.4);
+    border-radius: 8px;
+    padding: 25px;
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+  }
+  .auth-title {
+    color: #ffff00;
+    font-size: 20px;
+    font-weight: 900;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px #ffff00;
+  }
+  .auth-sub {
+    font-size: 12px;
+    color: #00ff00;
+    margin-bottom: 20px;
+    border-bottom: 2px dashed #00ff00;
+    padding-bottom: 10px;
+    font-weight: 800;
+  }
+  .auth-input {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid #00ff00;
+    border-radius: 4px;
+    background-color: #000;
+    color: #00ff00;
+    font-size: 16px;
+    font-weight: 800;
+    outline: none;
+    text-align: center;
+    letter-spacing: 3px;
+    margin-bottom: 15px;
+  }
+  .auth-btn {
+    width: 100%;
+    padding: 14px;
+    background-color: #00ff00;
+    color: #000;
+    border: 2px solid #00ff00;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 900;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+  .auth-status {
+    font-size: 12px;
+    margin-top: 14px;
+    min-height: 20px;
+    font-weight: 900;
+  }
+  .auth-status.err { color: #ff3333; }
+  .auth-status.ok { color: #ffff00; }
+
+  /* HEADER */
+  .terminal-box {
+    background: rgba(5, 18, 5, 0.92);
+    border: 3px solid #00ff00; /* Mota Border */
+    box-shadow: 0 0 25px rgba(0, 255, 0, 0.35);
+    padding: 20px;
+    border-radius: 8px;
+    width: 100%;
+    margin-bottom: 15px;
+  }
+  .terminal-header {
+    border-bottom: 2px dashed #00ff00;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    font-size: 13px;
+    font-weight: 800;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .asm-header {
+    color: #ffff00;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 900;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px #ffff00;
+  }
+
+  /* TOP BUTTONS */
+  .topbar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 15px;
+  }
+  .topbtn {
+    padding: 12px 6px;
+    border-radius: 4px;
+    background: #000;
+    border: 2px solid #00ff00; /* Mota Border */
+    color: #00ff00;
+    font-size: 13px;
+    font-weight: 900;
+    cursor: pointer;
+    text-align: center;
+    text-transform: uppercase;
+  }
+  .topbtn.active {
+    background: #00ff00;
+    color: #000;
+    box-shadow: 0 0 12px #00ff00;
+  }
+
+  /* CONSOLE LOG */
+  .hacker-console {
+    background: rgba(0, 0, 0, 0.9);
+    border: 2px solid #00ff00;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 15px;
+    font-size: 11px;
+    font-weight: 800;
+    height: 90px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  .console-line { color: #00ff00; margin-bottom: 2px; }
+  .console-line.warn { color: #ffff00; }
+  .console-line.danger { color: #ff3333; }
+  .console-line.success { color: #00ff00; font-weight: 900; }
+
+  /* PREDICTION CARD (BOX WITH HEAVY GREEN BORDER) */
+  .prediction-card {
+    background: rgba(0, 0, 0, 0.85);
+    border: 3px solid #00ff00; /* Mota Border */
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.25);
+    border-radius: 6px;
+    padding: 18px 14px;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+
+  .badge-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .pattern-badge {
+    padding: 5px 12px;
+    border-radius: 4px;
+    background: rgba(0, 255, 0, 0.1);
+    border: 2px solid #00ff00;
+    color: #00ff00;
+    font-size: 11px;
+    font-weight: 900;
+  }
+  .conf-badge {
+    padding: 5px 12px;
+    border-radius: 4px;
+    background: #ffff00;
+    color: #000;
+    font-size: 11px;
+    font-weight: 900;
+  }
+
+  /* TARGET LIST INSIDE BOX */
+  .target-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .target-item {
+    background: #000;
+    border: 2px solid #00ff00; /* Mota Border */
+    padding: 12px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+  }
+  .target-item:hover {
+    background: rgba(0, 255, 0, 0.2);
+  }
+  .target-name { font-size: 14px; color: #ffff00; font-weight: 900; }
+  .target-status { font-size: 11px; color: #00ff00; font-weight: 800; }
+
+  /* LOADING STATE IN BOX */
+  .loading-box {
+    padding: 25px 10px;
+    text-align: center;
+  }
+  .loader-spinner {
+    font-size: 13px;
+    color: #ffff00;
+    font-weight: 900;
+    letter-spacing: 1px;
+    animation: pulse 1s infinite;
+  }
+  @keyframes pulse {
+    0% { opacity: 0.3; }
+    50% { opacity: 1; text-shadow: 0 0 10px #ffff00; }
+    100% { opacity: 0.3; }
+  }
+
+  /* EMPTY STATE INITIAL */
+  .empty-box-msg {
+    padding: 30px 10px;
+    color: #00ff00;
+    font-size: 12px;
+    font-weight: 800;
+    border: 2px dashed rgba(0,255,0,0.5);
+    border-radius: 4px;
+    margin: 10px 0;
+  }
+
+  /* ACTION PANEL */
+  .action-panel {
+    display: none;
+    background: #000;
+    border: 2px solid #ffff00;
+    border-radius: 4px;
+    padding: 12px;
+    margin-top: 12px;
+  }
+  .action-panel.show { display: block; }
+  .selected-title { font-size: 13px; color: #ffff00; margin-bottom: 10px; font-weight: 900; }
+  .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .act-btn {
+    padding: 10px;
+    background: transparent;
+    border: 2px solid #00ff00;
+    color: #00ff00;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 900;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+  .act-btn:hover {
+    background: #00ff00;
+    color: #000;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .info-box {
+    background: #000;
+    border: 2px solid #00ff00;
+    border-radius: 4px;
+    padding: 8px;
+  }
+  .info-box .label { font-size: 10px; color: #00ff00; text-transform: uppercase; font-weight: 800; }
+  .info-box .value { font-size: 16px; color: #ffff00; font-weight: 900; margin-top: 2px; }
+
+  .martingale {
+    background: rgba(0, 255, 0, 0.08);
+    border: 2px solid #00ff00;
+    border-radius: 4px;
+    padding: 10px;
+    margin-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .martingale .level-info { font-size: 11px; color: #00ff00; font-weight: 900; }
+  .martingale .level-desc { font-size: 10px; color: #88ff88; font-weight: 700; }
+  .martingale .multiplier { font-weight: 900; font-size: 18px; color: #ffff00; }
+
+  .footer { text-align: center; font-size: 11px; color: #00ff00; font-weight: 800; padding: 10px 0; margin-top: 10px; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #000;
+    border: 2px solid #00ff00;
+    color: #ffff00;
+    padding: 12px 20px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 900;
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    box-shadow: 0 0 15px rgba(0,255,0,0.5);
+    max-width: 90%;
+    text-align: center;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="matrix-bg"></div>
+
+<!-- LOGIN / AUTH GATE -->
+<div id="authOverlay">
+  <div class="auth-box">
+    <div class="auth-title">[ RAFI PRIVATE PANEL ]</div>
+    <div class="auth-sub">> SYSTEM ACCESS REQUIRED</div>
+    <input type="password" id="passInput" class="auth-input" placeholder="••••••••" autofocus autocomplete="off" />
+    <button class="auth-btn" onclick="verifyPass()">UNLOCK DASHBOARD</button>
+    <div class="auth-status" id="authStatus"></div>
+  </div>
+</div>
+
+<!-- MAIN DASHBOARD -->
+<div class="wrap" id="mainDashboard">
+
+  <div class="terminal-box">
+    <div class="terminal-header">
+      <span>> Core_System@Rafi_Panel:~#</span>
+      <span style="color:#ffff00;">ONLINE 🟢</span>
+    </div>
+    <div class="asm-header">⚡ RAFI PRIVATE PANEL ⚡</div>
+  </div>
+
+  <!-- TOP BUTTONS -->
+  <div class="topbar">
+    <button class="topbtn" id="btnWifi" onclick="switchMode('wifi')">📶 WIFI</button>
+    <button class="topbtn" id="btnMobile" onclick="switchMode('mobile')">📱 MOBILE</button>
+    <button class="topbtn" id="btnData" onclick="switchMode('data')">📊 DATA</button>
+  </div>
+
+  <!-- HACKER CONSOLE -->
+  <div class="hacker-console" id="consoleBox">
+    <div class="console-line">[SYSTEM] Rafi Private Engine Initialized...</div>
+    <div class="console-line success">[OK] Access granted. Ready for operation.</div>
+  </div>
+
+  <!-- MAIN PREDICTION / TARGET BOX -->
+  <div class="prediction-card">
+    <div class="badge-row">
+      <div class="pattern-badge" id="panelModeBadge">SYSTEM READY</div>
+      <div class="conf-badge" id="confidenceBadge">98.8% CONFIDENCE</div>
+    </div>
+
+    <!-- MAIN VIEW CONTAINER (INITIAL EMPTY) -->
+    <div id="modeContent">
+      <div class="empty-box-msg">
+        [ SYSTEM IDLE ]<br>
+        PLEASE PRESS WIFI OR MOBILE TO SCAN TARGETS
+      </div>
+    </div>
+
+    <!-- ACTION PANEL -->
+    <div class="action-panel" id="actionPanel">
+      <div class="selected-title" id="selectedTargetTitle">TARGET: NONE</div>
+      <div class="action-grid" id="actionButtons">
+        <!-- Buttons loaded dynamically -->
+      </div>
+    </div>
+
+    <!-- FOOTER STATS -->
+    <div class="info-grid">
+      <div class="info-box">
+        <div class="label">LUCKY CODE</div>
+        <div class="value" id="luckyNumber">7</div>
+      </div>
+      <div class="info-box">
+        <div class="label">AI ACCURACY</div>
+        <div class="value" id="confValue">98.8%</div>
+      </div>
+    </div>
+
+    <div class="martingale">
+      <div>
+        <div class="level-info" id="levelInfo">LEVEL 1 (1X BASE START)</div>
+        <div class="level-desc" id="levelDesc">Standard payload execution</div>
+      </div>
+      <div class="multiplier" id="multiplier">1X</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    RAFI-PRIVATE-PANEL-v2026 • SSL Secured Node
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let currentMode = '';
+  let activeTarget = '';
+
+  // Check Password
+  function verifyPass() {
+    const input = document.getElementById('passInput').value;
+    const status = document.getElementById('authStatus');
+
+    if (!input) return;
+
+    status.className = 'auth-status ok';
+    status.textContent = 'DETECTING ACCESS KEY...';
+
+    setTimeout(() => {
+      if (input === 'RAFIVIP1') {
+        status.textContent = '✔ ACCESS GRANTED! UNLOCKING...';
+        setTimeout(() => {
+          document.getElementById('authOverlay').style.display = 'none';
+          document.getElementById('mainDashboard').style.display = 'block';
+          logConsole('[AUTH] Authenticated as RAFIVIP1', 'success');
+        }, 600);
+      } else {
+        status.className = 'auth-status err';
+        status.textContent = '!! ACCESS DENIED: INVALID KEY !!';
+      }
+    }, 800);
+  }
+
+  document.getElementById('passInput').addEventListener('keyup', function(e) {
+    if (e.key === 'Enter') verifyPass();
+  });
+
+  // Switch modes: WIFI, MOBILE, DATA
+  function switchMode(mode) {
+    currentMode = mode;
+    
+    document.getElementById('btnWifi').className = 'topbtn ' + (mode === 'wifi' ? 'active' : '');
+    document.getElementById('btnMobile').className = 'topbtn ' + (mode === 'mobile' ? 'active' : '');
+    document.getElementById('btnData').className = 'topbtn ' + (mode === 'data' ? 'active' : '');
+
+    // Reset action panel
+    const actionPanel = document.getElementById('actionPanel');
+    actionPanel.className = 'action-panel';
+
+    const content = document.getElementById('modeContent');
+
+    if (mode === 'wifi') {
+      document.getElementById('panelModeBadge').textContent = '📶 WIFI RADAR SCANNING';
+      logConsole('[WIFI] Initializing signal frequency scan...', 'warn');
+      
+      // 2 Seconds Loading
+      content.innerHTML = `
+        <div class="loading-box">
+          <div class="loader-spinner">⏳ DETECTING NEARBY WIFI NETWORKS...</div>
+        </div>
+      `;
+
+      setTimeout(() => {
+        content.innerHTML = `
+          <div class="target-list">
+            <div class="target-item" onclick="selectTarget('MAMUN WIFI')"><span class="target-name">MAMUN WIFI</span><span class="target-status">[-42 dBm] SECURE</span></div>
+            <div class="target-item" onclick="selectTarget('A388 WIFI')"><span class="target-name">A388 WIFI</span><span class="target-status">[-58 dBm] WPA2</span></div>
+            <div class="target-item" onclick="selectTarget('SUMIYA WIFI')"><span class="target-name">SUMIYA WIFI</span><span class="target-status">[-35 dBm] STRONG</span></div>
+            <div class="target-item" onclick="selectTarget('A389 WIFI')"><span class="target-name">A389 WIFI</span><span class="target-status">[-65 dBm] WPA3</span></div>
+            <div class="target-item" onclick="selectTarget('RAFI_VIP_5G')"><span class="target-name">RAFI_VIP_5G</span><span class="target-status">[-20 dBm] LOCKED</span></div>
+            <div class="target-item" onclick="selectTarget('TP-LINK_HOME')"><span class="target-name">TP-LINK_HOME</span><span class="target-status">[-70 dBm] WPA2</span></div>
+          </div>
+        `;
+        logConsole('[WIFI] Scan complete. 6 Networks detected.', 'success');
+      }, 2000);
+
+    } else if (mode === 'mobile') {
+      document.getElementById('panelModeBadge').textContent = '📱 MOBILE SCANNER ACTIVE';
+      logConsole('[MOBILE] Scanning nearby wireless devices...', 'warn');
+
+      // 2 Seconds Loading
+      content.innerHTML = `
+        <div class="loading-box">
+          <div class="loader-spinner">⏳ ACCESSING NEARBY DEVICES...</div>
+        </div>
+      `;
+
+      setTimeout(() => {
+        content.innerHTML = `
+          <div class="target-list">
+            <div class="target-item" onclick="selectTarget('REDMI NOTE 13')"><span class="target-name">REDMI NOTE 13</span><span class="target-status">[192.168.1.14]</span></div>
+            <div class="target-item" onclick="selectTarget('SAMSUNG GALAXY A32')"><span class="target-name">SAMSUNG GALAXY A32</span><span class="target-status">[192.168.1.28]</span></div>
+            <div class="target-item" onclick="selectTarget('XIAOMI 15')"><span class="target-name">XIAOMI 15</span><span class="target-status">[192.168.1.09]</span></div>
+            <div class="target-item" onclick="selectTarget('REDMI 13')"><span class="target-name">REDMI 13</span><span class="target-status">[192.168.1.45]</span></div>
+            <div class="target-item" onclick="selectTarget('IPHONE 15 PRO')"><span class="target-name">IPHONE 15 PRO</span><span class="target-status">[192.168.1.88]</span></div>
+            <div class="target-item" onclick="selectTarget('REALME 11 PRO')"><span class="target-name">REALME 11 PRO</span><span class="target-status">[192.168.1.92]</span></div>
+          </div>
+        `;
+        logConsole('[MOBILE] Target discovery complete.', 'success');
+      }, 2000);
+
+    } else if (mode === 'data') {
+      document.getElementById('panelModeBadge').textContent = '📊 DATA MODULE STATUS';
+      content.innerHTML = `
+        <div style="padding:25px 10px;color:#ff3333;font-size:13px;font-weight:900;">
+          ⚠ MODULE INACTIVE / OFF<br>
+          <span style="font-size:10px;color:#00ff00;margin-top:6px;display:block;">THIS OPTION IS CURRENTLY DISABLED BY ADMIN</span>
+        </div>
+      `;
+      logConsole('[DATA] Requested module is offline.', 'danger');
+    }
+  }
+
+  // Select Target Click
+  function selectTarget(name) {
+    activeTarget = name;
+    document.getElementById('selectedTargetTitle').textContent = 'TARGET: ' + name;
+    const actionPanel = document.getElementById('actionPanel');
+    const btns = document.getElementById('actionButtons');
+
+    if (currentMode === 'wifi') {
+      btns.innerHTML = `
+        <button class="act-btn" onclick="executeAction('BLOCK WIFI')">BLOCK WIFI</button>
+        <button class="act-btn" onclick="executeAction('CRACK PASS')">CRACK PASS</button>
+        <button class="act-btn" onclick="executeAction('CRACK DATA')">CRACK DATA</button>
+        <button class="act-btn" onclick="executeAction('CRACK WIFI')">CRACK WIFI</button>
+      `;
+    } else if (currentMode === 'mobile') {
+      btns.innerHTML = `
+        <button class="act-btn" onclick="executeAction('DATA LEAK')">DATA LEAK</button>
+        <button class="act-btn" onclick="executeAction('PHONE SERVER DOWN')">SERVER DOWN</button>
+        <button class="act-btn" onclick="executeAction('REMOTE LOCK')">REMOTE LOCK</button>
+        <button class="act-btn" onclick="executeAction('CAMERA FEED')">CAM INJECT</button>
+      `;
+    }
+
+    actionPanel.className = 'action-panel show';
+    showToast(`🎯 Target Selected: ${name}`);
+  }
+
+  // Action Execution with Auto-Hide Options
+  function executeAction(act) {
+    const actionPanel = document.getElementById('actionPanel');
+    
+    // Immediately Hide Options
+    actionPanel.className = 'action-panel';
+
+    logConsole(`[EXECUTE] Processing ${act} on ${activeTarget}...`, 'warn');
+    showToast(`⚡ Running ${act}...`);
+
+    setTimeout(() => {
+      if (act === 'BLOCK WIFI') {
+        logConsole(`[STATUS] ${activeTarget} -> BLOCKED / DONE ✔`, 'success');
+        showToast(`✔ ${activeTarget} BLOCKED DONE!`);
+      } else if (act === 'CRACK PASS') {
+        logConsole(`[STATUS] ${activeTarget} -> FAILED / DENIED ✖`, 'danger');
+        showToast(`✖ CRACK PASS FAILED! Encrypted.`);
+      } else if (act === 'CRACK DATA') {
+        logConsole(`[STATUS] ${activeTarget} -> DATA CRACKED / APPROVED ✔`, 'success');
+        showToast(`✔ DATA CRACK APPROVED!`);
+      } else if (act === 'CRACK WIFI') {
+        logConsole(`[STATUS] ${activeTarget} -> WIFI CRACKED / APPROVED ✔`, 'success');
+        showToast(`✔ WIFI CRACK APPROVED!`);
+      } else if (act === 'PHONE SERVER DOWN') {
+        logConsole(`[INJECT] Sending Server Crash Request to ${activeTarget}...`, 'warn');
+        setTimeout(() => {
+          logConsole(`[STATUS] ${activeTarget} -> SERVER DOWN / DONE ✔`, 'success');
+          showToast(`🔥 ${activeTarget} SERVER DOWN DONE!`);
+        }, 1000);
+      } else if (act === 'DATA LEAK') {
+        logConsole(`[STATUS] ${activeTarget} -> DATA LEAK / DONE ✔`, 'success');
+        showToast(`📁 Mobile Data Leaked!`);
+      } else {
+        logConsole(`[STATUS] ${activeTarget} -> ${act} / DONE ✔`, 'success');
+        showToast(`✔ ${act} DONE!`);
+      }
+    }, 1000);
+  }
+
+  // Console log helper
+  function logConsole(msg, type = '') {
+    const box = document.getElementById('consoleBox');
+    const line = document.createElement('div');
+    line.className = 'console-line ' + type;
+    line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    box.appendChild(line);
+
+    if (box.childNodes.length > 7) {
+      box.removeChild(box.firstChild);
+    }
+    box.scrollTop = box.scrollHeight;
+  }
+
+  // Toast Helper
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+</script>
+</body>
+</html>
